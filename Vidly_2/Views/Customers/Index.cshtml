@@ -19,11 +19,13 @@
             <caption>I am the Caption....</caption>
             <tr>
                 <th>Name</th>
+                <th>Discount Rate</th>
             </tr>
             @foreach (var customer in Model)
             {
                 <tr>
                     <td>@Html.ActionLink(@customer.Name, "CustomerDetails", new { id=@customer.Id }) </td>
+                    <td>@customer.MembershipType.DiscountFee</td>
                 </tr>
             }
         </table>
