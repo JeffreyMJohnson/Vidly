@@ -9,25 +9,62 @@ namespace Vidly_2.Controllers
 {
     public class MoviesController : Controller
     {
-        private List<Movie> _movies = new List<Movie>()
+        private ApplicationDbContext _context;
+
+        public MoviesController()
         {
-            new Movie(){Id = 0, Name = "Shrek!"},
-            new Movie(){Id = 1, Name = "Heavy Metal"},
-            new Movie(){Id = 2, Name = "2001 A Space Oddysey"}
-        };
+            _context = new ApplicationDbContext();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            _context.Dispose();
+        }
 
         // GET: Movies
         public ActionResult Index()
         {
-            return View(_movies);
+            List<Movie> movies = GetMovies();
+
+            return View(movies);
+        }
+
+        public ActionResult MovieDetails(int? id)
+        {
+            var movies = GetMovies();
+
+            if(id == null || movies.All(m => m.Id != id))
+            {
+                return new HttpNotFoundResult();
+            }
+            var movie = movies.FirstOrDefault(m => m.Id == id);
+
+            return View(movie);
         }
 
 
         public ActionResult Random()
         {
-            Movie movie = new Movie(){Name = "Shrek!"};
+            var randomMovie = GetRandomMovie();
 
-            return View(movie);
+            return View(randomMovie);
+        }
+
+        private List<Movie> GetMovies()
+        {
+            List<Movie> movies = _context.Movies.Include("Genre").ToList();
+            return movies;
+        }
+
+        private Movie GetRandomMovie()
+        {
+            var movies = GetMovies();
+            if (movies.Count == 0) return null;
+
+            var randomIndex = new Random().Next(movies.Count);
+            var randomMovie = movies.ElementAtOrDefault(randomIndex);
+
+            return randomMovie;
         }
     }
 }
